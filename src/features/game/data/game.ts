@@ -15,7 +15,7 @@ export interface GameData {
 export class Game {
   constructor(private data: GameData) {}
 
-  static get(id: string): Game | null {
+  static get(id: GameData['id']): Game | null {
     const data = getDataSourceMemory().Games.get(id);
     return data ? new Game(data) : null;
   }
