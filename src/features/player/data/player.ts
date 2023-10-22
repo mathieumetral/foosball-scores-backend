@@ -1,4 +1,5 @@
 import {getDataSourceMemory} from '@data/sources/memory';
+import {Team} from '@features/team/data/team';
 
 export interface PlayerData {
   id: string;
@@ -19,5 +20,17 @@ export class Player {
 
   getName(): string {
     return this.data.name;
+  }
+
+  getTeams(offset: number, limit: number): Team[] {
+    const teams = [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(this.getId()));
+    return teams
+      .slice(offset, offset + limit)
+      .map(({id}) => Team.get(id))
+      .filter(Boolean);
+  }
+
+  countTeams(): number {
+    return [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(this.getId())).length;
   }
 }
