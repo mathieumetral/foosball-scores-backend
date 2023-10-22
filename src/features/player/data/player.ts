@@ -14,6 +14,14 @@ export class Player {
     return data ? new Player(data) : null;
   }
 
+  static getMany(offset: number, limit: number): Player[] {
+    return [...getDataSourceMemory().Players.values()].slice(offset, offset + limit).map(data => new Player(data));
+  }
+
+  static count(): number {
+    return [...getDataSourceMemory().Players.values()].length;
+  }
+
   getId(): string {
     return this.data.id;
   }
