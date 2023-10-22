@@ -2,6 +2,7 @@ import {getDataSourceMemory} from '@data/sources/memory';
 import {GameSide, GameSideData} from '@features/game/data/game-side';
 import {CreateGameInput} from '@features/game/schema/mutations/create-game';
 import {Team} from '@features/team/data/team';
+import {UpdateGameInput} from '@features/game/schema/mutations/update-game';
 
 export interface GameData {
   id: string;
@@ -12,7 +13,7 @@ export interface GameData {
 }
 
 export class Game {
-  constructor(private readonly data: GameData) {}
+  constructor(private data: GameData) {}
 
   static get(id: string): Game | null {
     const data = getDataSourceMemory().Games.get(id);
@@ -32,6 +33,33 @@ export class Game {
     };
     getDataSourceMemory().Games.set(newData.id, newData);
     return new Game(newData);
+  }
+
+  static update(input: UpdateGameInput): Game | null {
+    const game = Game.get(String(input.id));
+    if (!game) {
+      return null;
+    }
+
+    game.update(input);
+    return game;
+  }
+
+  update(input: Omit<UpdateGameInput, 'id'>) {
+    const leftSideBeforeUpdate = this.getLeftSide();
+    const rightSideBeforeUpdate = this.getRightSide();
+
+    this.data.leftSideTeamId = input.leftSide?.playerName
+      ? Team.getOrCreateByPlayerName(input.leftSide.playerName).getId()
+      : leftSideBeforeUpdate.getTeam().getId();
+    this.data.rightSideTeamId = input.rightSide?.playerName
+      ? Team.getOrCreateByPlayerName(input.rightSide.playerName).getId()
+      : rightSideBeforeUpdate.getTeam().getId();
+
+    this.data.leftSideScore = input.leftSide?.score ?? leftSideBeforeUpdate.getScore();
+    this.data.rightSideScore = input.rightSide?.score ?? rightSideBeforeUpdate.getScore();
+
+    getDataSourceMemory().Games.set(this.getId(), this.data);
   }
 
   getId(): string {
