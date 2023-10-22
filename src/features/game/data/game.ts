@@ -20,6 +20,14 @@ export class Game {
     return data ? new Game(data) : null;
   }
 
+  static getMany(offset: number, limit: number): Game[] {
+    return [...getDataSourceMemory().Games.values()].slice(offset, offset + limit).map(data => new Game(data));
+  }
+
+  static count(): number {
+    return [...getDataSourceMemory().Games.values()].length;
+  }
+
   static create(input: CreateGameInput): Game {
     const leftSideTeam = Team.getOrCreateByPlayerName(input.leftSide.playerName);
     const rightSideTeam = Team.getOrCreateByPlayerName(input.rightSide.playerName);
