@@ -14,7 +14,9 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "@app/*": ["./app/*"]
+      "@app/*": ["./app/*"],
+      "@data/*": ["./data/*"],
+      "@features/*": ["./features/*"]
     }
   },
   "include": ["**/*.ts"],

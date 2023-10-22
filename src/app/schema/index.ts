@@ -1,5 +1,6 @@
 import {schemaBuilder} from '@app/schema/builder';
 
-// TODO: Import schema's features here
+// Features
+import '@features/schema';
 
 export const schema = schemaBuilder.toSchema();
