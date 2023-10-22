@@ -1,0 +1,12 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Logs
+yarn-debug.log*
+yarn-error.log*
+
+# Package Manager
+node_modules/
+
+# Misc
+.DS_Store
+*.pem

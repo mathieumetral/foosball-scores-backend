@@ -1,0 +1,14 @@
+{
+  "name": "@foosball-scores/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.7",
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2"
+  }
+}
