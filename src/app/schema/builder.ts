@@ -11,13 +11,5 @@ export const schemaBuilder = new SchemaBuilder<{
   relayOptions: {},
 });
 
-schemaBuilder.queryType({
-  fields: t => ({
-    hello: t.string({
-      args: {
-        name: t.arg.string(),
-      },
-      resolve: (parent, {name}) => `Hello ${name ?? 'World'}`,
-    }),
-  }),
-});
+schemaBuilder.queryType();
+schemaBuilder.mutationType();
