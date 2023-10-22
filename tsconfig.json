@@ -16,7 +16,8 @@
     "paths": {
       "@app/*": ["./app/*"],
       "@data/*": ["./data/*"],
-      "@features/*": ["./features/*"]
+      "@features/*": ["./features/*"],
+      "@lib/*": ["./lib/*"]
     }
   },
   "include": ["**/*.ts"],
