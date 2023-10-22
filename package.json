@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
+    "schema:print": "tsx scripts/schema-print.ts",
     "format": "prettier --check '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
     "format:fix": "prettier --write '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
     "lint": "eslint '{**/*,*}.{js,cjs,ts}'",
