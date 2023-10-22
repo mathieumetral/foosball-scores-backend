@@ -15,6 +15,24 @@ export class Team {
     return data ? new Team(data) : null;
   }
 
+  static getOrCreateByPlayerName(name: string): Team {
+    const player = Player.getOrCreateByName(name);
+
+    const existingData = [...getDataSourceMemory().Teams.values()].filter(
+      data => data.playerIds.length === 1 && data.playerIds.includes(player.getId())
+    );
+    if (existingData.length) {
+      return new Team(existingData[0]);
+    }
+
+    const newData: TeamData = {
+      id: crypto.randomUUID(),
+      playerIds: [player.getId()],
+    };
+    getDataSourceMemory().Teams.set(newData.id, newData);
+    return new Team(newData);
+  }
+
   getId(): string {
     return this.data.id;
   }
