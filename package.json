@@ -8,7 +8,8 @@
     "format": "prettier --check '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
     "format:fix": "prettier --write '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
     "lint": "eslint '{**/*,*}.{js,cjs,ts}'",
-    "lint:fix": "eslint --fix '{**/*,*}.{js,cjs,ts}'"
+    "lint:fix": "eslint --fix '{**/*,*}.{js,cjs,ts}'",
+    "typescript:check": "tsc --project tsconfig.json"
   },
   "devDependencies": {
     "@total-typescript/ts-reset": "^0.5.1",
