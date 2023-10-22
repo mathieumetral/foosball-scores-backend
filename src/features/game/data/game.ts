@@ -43,16 +43,6 @@ export class Game {
     return new Game(newData);
   }
 
-  static update(input: UpdateGameInput): Game | null {
-    const game = Game.get(String(input.id));
-    if (!game) {
-      return null;
-    }
-
-    game.update(input);
-    return game;
-  }
-
   update(input: Omit<UpdateGameInput, 'id'>) {
     const leftSideBeforeUpdate = this.getLeftSide();
     const rightSideBeforeUpdate = this.getRightSide();
@@ -68,6 +58,10 @@ export class Game {
     this.data.rightSideScore = input.rightSide?.score ?? rightSideBeforeUpdate.getScore();
 
     getDataSourceMemory().Games.set(this.getId(), this.data);
+  }
+
+  delete() {
+    getDataSourceMemory().Games.delete(this.getId());
   }
 
   getId(): string {
