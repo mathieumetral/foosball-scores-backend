@@ -14,6 +14,20 @@ export class Player {
     return data ? new Player(data) : null;
   }
 
+  static getOrCreateByName(name: string): Player {
+    const existingData = [...getDataSourceMemory().Players.values()].filter(data => data.name === name);
+    if (existingData.length) {
+      return new Player(existingData[0]);
+    }
+
+    const newData: PlayerData = {
+      id: crypto.randomUUID(),
+      name,
+    };
+    getDataSourceMemory().Players.set(newData.id, newData);
+    return new Player(newData);
+  }
+
   static getMany(offset: number, limit: number): Player[] {
     return [...getDataSourceMemory().Players.values()].slice(offset, offset + limit).map(data => new Player(data));
   }
