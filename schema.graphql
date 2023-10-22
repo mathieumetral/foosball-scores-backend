@@ -1,0 +1,135 @@
+input CreateGameInput {
+  leftSide: CreateGameSideInput!
+  rightSide: CreateGameSideInput!
+}
+
+input CreateGameSideInput {
+  playerName: String!
+  score: Int
+}
+
+input DeleteGameInput {
+  id: ID!
+}
+
+type Game implements Node {
+  id: ID!
+  leftSide: GameSide!
+  rightSide: GameSide!
+}
+
+type GameSide {
+  score: Int!
+  team: Team!
+}
+
+type Mutation {
+  createGame(input: CreateGameInput!): Game!
+  deleteGame(input: DeleteGameInput!): Game
+  updateGame(input: UpdateGameInput!): Game
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageCursor {
+  cursor: String!
+  isCurrent: Boolean!
+  pageNumber: Int!
+}
+
+type PageCursors {
+  around: [PageCursor!]!
+  first: PageCursor!
+  last: PageCursor!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Player implements Node {
+  id: ID!
+  name: String!
+  stats: PlayerStats!
+  teams(after: ID, before: ID, first: Int, last: Int): PlayerTeamsConnection!
+}
+
+type PlayerStats {
+  goalsAgainst: Int!
+  goalsFor: Int!
+  losses: Int!
+  wins: Int!
+}
+
+type PlayerTeamsConnection {
+  edges: [PlayerTeamsConnectionEdge]!
+  pageCursors: PageCursors!
+  pageInfo: PageInfo!
+}
+
+type PlayerTeamsConnectionEdge {
+  cursor: String!
+  node: Team!
+}
+
+type Query {
+  games(after: ID, before: ID, first: Int, last: Int): QueryGamesConnection!
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+  players(after: ID, before: ID, first: Int, last: Int): QueryPlayersConnection!
+}
+
+type QueryGamesConnection {
+  edges: [QueryGamesConnectionEdge]!
+  pageCursors: PageCursors!
+  pageInfo: PageInfo!
+}
+
+type QueryGamesConnectionEdge {
+  cursor: String!
+  node: Game!
+}
+
+type QueryPlayersConnection {
+  edges: [QueryPlayersConnectionEdge]!
+  pageCursors: PageCursors!
+  pageInfo: PageInfo!
+}
+
+type QueryPlayersConnectionEdge {
+  cursor: String!
+  node: Player!
+}
+
+type Team implements Node {
+  games(after: ID, before: ID, first: Int, last: Int): TeamGamesConnection!
+  id: ID!
+  players: [Player!]!
+}
+
+type TeamGamesConnection {
+  edges: [TeamGamesConnectionEdge]!
+  pageCursors: PageCursors!
+  pageInfo: PageInfo!
+}
+
+type TeamGamesConnectionEdge {
+  cursor: String!
+  node: Game!
+}
+
+input UpdateGameInput {
+  id: ID!
+  leftSide: UpdateGameSideInput
+  rightSide: UpdateGameSideInput
+}
+
+input UpdateGameSideInput {
+  playerName: String
+  score: Int
+}
