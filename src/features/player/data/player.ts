@@ -1,5 +1,6 @@
 import {getDataSourceMemory} from '@data/sources/memory';
 import {Team} from '@features/team/data/team';
+import {PlayerStats} from '@features/player/data/player-stats';
 
 export interface PlayerData {
   id: string;
@@ -9,12 +10,12 @@ export interface PlayerData {
 export class Player {
   constructor(private readonly data: PlayerData) {}
 
-  static get(id: string): Player | null {
+  static get(id: PlayerData['id']): Player | null {
     const data = getDataSourceMemory().Players.get(id);
     return data ? new Player(data) : null;
   }
 
-  static getOrCreateByName(name: string): Player {
+  static getOrCreateByName(name: PlayerData['name']): Player {
     const existingData = [...getDataSourceMemory().Players.values()].filter(data => data.name === name);
     if (existingData.length) {
       return new Player(existingData[0]);
@@ -54,5 +55,9 @@ export class Player {
 
   countTeams(): number {
     return [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(this.getId())).length;
+  }
+
+  getStats(): PlayerStats {
+    return PlayerStats.get(this.getId());
   }
 }

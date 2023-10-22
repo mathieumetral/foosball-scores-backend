@@ -2,6 +2,25 @@ import {schemaBuilder} from '@app/schema/builder';
 import {Player} from '@features/player/data/player';
 import {Team} from '@features/team/data/team';
 import {resolveWindowedConnection} from '@lib/pagination/utils';
+import {PlayerStats} from '@features/player/data/player-stats';
+
+schemaBuilder.objectType(PlayerStats, {
+  name: 'PlayerStats',
+  fields: t => ({
+    wins: t.int({
+      resolve: playerStats => playerStats.getWins(),
+    }),
+    losses: t.int({
+      resolve: playerStats => playerStats.getLosses(),
+    }),
+    goalsFor: t.int({
+      resolve: playerStats => playerStats.getGoalsFor(),
+    }),
+    goalsAgainst: t.int({
+      resolve: playerStats => playerStats.getGoalsAgainst(),
+    }),
+  }),
+});
 
 schemaBuilder.node(Player, {
   name: 'Player',
@@ -22,6 +41,10 @@ schemaBuilder.node(Player, {
             totalCount: player.countTeams(),
           };
         }),
+    }),
+    stats: t.field({
+      type: PlayerStats,
+      resolve: player => player.getStats(),
     }),
   }),
 });

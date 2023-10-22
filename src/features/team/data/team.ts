@@ -1,5 +1,5 @@
 import {getDataSourceMemory} from '@data/sources/memory';
-import {Player} from '@features/player/data/player';
+import {Player, PlayerData} from '@features/player/data/player';
 import {Game} from '@features/game/data/game';
 
 export interface TeamData {
@@ -10,12 +10,12 @@ export interface TeamData {
 export class Team {
   constructor(private readonly data: TeamData) {}
 
-  static get(id: string): Team | null {
+  static get(id: TeamData['id']): Team | null {
     const data = getDataSourceMemory().Teams.get(id);
     return data ? new Team(data) : null;
   }
 
-  static getOrCreateByPlayerName(name: string): Team {
+  static getOrCreateByPlayerName(name: PlayerData['name']): Team {
     const player = Player.getOrCreateByName(name);
 
     const existingData = [...getDataSourceMemory().Teams.values()].filter(
