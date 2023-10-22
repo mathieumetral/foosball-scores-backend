@@ -1,5 +1,5 @@
 import {schemaBuilder} from '@app/schema/builder';
-import {Game, GameData} from '@features/game/data/game';
+import {Game} from '@features/game/data/game';
 import {decodeGlobalID} from '@pothos/plugin-relay';
 
 interface DeleteGameInput {
