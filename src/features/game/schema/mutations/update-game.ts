@@ -45,10 +45,13 @@ schemaBuilder.mutationField('updateGame', t =>
     },
     resolve: (parent, {input}) => {
       const {id} = decodeGlobalID(String(input.id));
-      return Game.update({
-        ...input,
-        id,
-      });
+      const game = Game.get(String(id));
+      if (!game) {
+        return null;
+      }
+
+      game.update(input);
+      return game;
     },
   })
 );
