@@ -17,11 +17,17 @@ schemaBuilder.objectType(PlayerStats, {
     losses: t.int({
       resolve: playerStats => playerStats.getLosses(),
     }),
+    ratio: t.float({
+      resolve: playerStats => playerStats.getRatio(),
+    }),
     goalsFor: t.int({
       resolve: playerStats => playerStats.getGoalsFor(),
     }),
     goalsAgainst: t.int({
       resolve: playerStats => playerStats.getGoalsAgainst(),
+    }),
+    goalsDifference: t.float({
+      resolve: playerStats => playerStats.getGoalsDifference(),
     }),
   }),
 });
