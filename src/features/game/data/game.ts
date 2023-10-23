@@ -1,67 +1,85 @@
-import {getDataSourceMemory} from '@data/sources/memory';
 import {GameSide, GameSideData} from '@features/game/data/game-side';
 import {CreateGameInput} from '@features/game/schema/mutations/create-game';
 import {Team} from '@features/team/data/team';
 import {UpdateGameInput} from '@features/game/schema/mutations/update-game';
+import {getDataSourcePostgreSQL} from '@data/sources/postgresql';
 
 export interface GameData {
   id: string;
-  leftSideTeamId: GameSideData['teamId'];
-  leftSideScore: GameSideData['score'];
-  rightSideTeamId: GameSideData['teamId'];
-  rightSideScore: GameSideData['score'];
+  leftTeamId: GameSideData['teamId'];
+  leftTeamScore: GameSideData['score'];
+  rightTeamId: GameSideData['teamId'];
+  rightTeamScore: GameSideData['score'];
 }
 
 export class Game {
   constructor(private data: GameData) {}
 
-  static get(id: GameData['id']): Game | null {
-    const data = getDataSourceMemory().Games.get(id);
+  static async get(id: GameData['id']): Promise<Game | null> {
+    const data = await getDataSourcePostgreSQL().game.findUnique({where: {id}});
     return data ? new Game(data) : null;
   }
 
-  static getMany(offset: number, limit: number): Game[] {
-    return [...getDataSourceMemory().Games.values()].slice(offset, offset + limit).map(data => new Game(data));
+  static async getMany(offset: number, limit: number): Promise<Game[]> {
+    const data = await getDataSourcePostgreSQL().game.findMany({
+      skip: offset,
+      take: limit,
+    });
+    return data.map(entry => new Game(entry));
   }
 
-  static count(): number {
-    return [...getDataSourceMemory().Games.values()].length;
+  static async count(): Promise<number> {
+    return getDataSourcePostgreSQL().game.count();
   }
 
-  static create(input: CreateGameInput): Game {
-    const leftSideTeam = Team.getOrCreateByPlayerName(input.leftSide.playerName);
-    const rightSideTeam = Team.getOrCreateByPlayerName(input.rightSide.playerName);
+  static async create(input: CreateGameInput): Promise<Game> {
+    const isDuplicatePlayer = input.leftSide.playerName === input.rightSide.playerName;
+    if (isDuplicatePlayer) {
+      throw new Error(`The same player is present in both teams.`);
+    }
 
-    const newData: GameData = {
-      id: crypto.randomUUID(),
-      leftSideTeamId: leftSideTeam.getId(),
-      rightSideTeamId: rightSideTeam.getId(),
-      leftSideScore: input.leftSide.score ?? 0,
-      rightSideScore: input.rightSide.score ?? 0,
-    };
-    getDataSourceMemory().Games.set(newData.id, newData);
-    return new Game(newData);
+    const [leftTeam, rightTeam] = await Promise.all([
+      Team.getOrCreateByPlayerName(input.leftSide.playerName),
+      Team.getOrCreateByPlayerName(input.rightSide.playerName),
+    ]);
+
+    const createdData = await getDataSourcePostgreSQL().game.create({
+      data: {
+        leftTeamId: leftTeam.getId(),
+        rightTeamId: rightTeam.getId(),
+        leftTeamScore: input.leftSide.score ?? 0,
+        rightTeamScore: input.rightSide.score ?? 0,
+      },
+    });
+    return new Game(createdData);
   }
 
-  update(input: Omit<UpdateGameInput, 'id'>) {
-    const leftSideBeforeUpdate = this.getLeftSide();
-    const rightSideBeforeUpdate = this.getRightSide();
+  async update(input: Omit<UpdateGameInput, 'id'>) {
+    const leftTeamPromise = input.leftSide?.playerName
+      ? Team.getOrCreateByPlayerName(input.leftSide.playerName)
+      : Promise.resolve(this.getLeftSide().getTeam());
 
-    this.data.leftSideTeamId = input.leftSide?.playerName
-      ? Team.getOrCreateByPlayerName(input.leftSide.playerName).getId()
-      : leftSideBeforeUpdate.getTeam().getId();
-    this.data.rightSideTeamId = input.rightSide?.playerName
-      ? Team.getOrCreateByPlayerName(input.rightSide.playerName).getId()
-      : rightSideBeforeUpdate.getTeam().getId();
+    const rightTeamPromise = input.rightSide?.playerName
+      ? Team.getOrCreateByPlayerName(input.rightSide.playerName)
+      : Promise.resolve(this.getRightSide().getTeam());
 
-    this.data.leftSideScore = input.leftSide?.score ?? leftSideBeforeUpdate.getScore();
-    this.data.rightSideScore = input.rightSide?.score ?? rightSideBeforeUpdate.getScore();
+    const [leftTeam, rightTeam] = await Promise.all([leftTeamPromise, rightTeamPromise]);
 
-    getDataSourceMemory().Games.set(this.getId(), this.data);
+    this.data = await getDataSourcePostgreSQL().game.update({
+      where: {id: this.getId()},
+      data: {
+        leftTeamId: leftTeam.getId(),
+        rightTeamId: rightTeam.getId(),
+        leftTeamScore: input.leftSide?.score ?? this.getLeftSide().getScore(),
+        rightTeamScore: input.rightSide?.score ?? this.getRightSide().getScore(),
+      },
+    });
   }
 
-  delete() {
-    getDataSourceMemory().Games.delete(this.getId());
+  async delete() {
+    await getDataSourcePostgreSQL().game.delete({
+      where: {id: this.getId()},
+    });
   }
 
   getId(): string {
@@ -70,15 +88,15 @@ export class Game {
 
   getLeftSide(): GameSide {
     return new GameSide({
-      teamId: this.data.leftSideTeamId,
-      score: this.data.leftSideScore,
+      teamId: this.data.leftTeamId,
+      score: this.data.leftTeamScore,
     });
   }
 
   getRightSide(): GameSide {
     return new GameSide({
-      teamId: this.data.rightSideTeamId,
-      score: this.data.rightSideScore,
+      teamId: this.data.rightTeamId,
+      score: this.data.rightTeamScore,
     });
   }
 }

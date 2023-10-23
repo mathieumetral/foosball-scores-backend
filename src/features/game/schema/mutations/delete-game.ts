@@ -23,14 +23,14 @@ schemaBuilder.mutationField('deleteGame', t =>
     args: {
       input: t.arg({type: DeleteGameInputRef, required: true}),
     },
-    resolve: (parent, {input}) => {
+    resolve: async (parent, {input}) => {
       const {id} = decodeGlobalID(String(input.id));
-      const game = Game.get(String(id));
+      const game = await Game.get(String(id));
       if (!game) {
         return null;
       }
 
-      game.delete();
+      await game.delete();
       return game;
     },
   })

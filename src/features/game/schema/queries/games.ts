@@ -6,9 +6,9 @@ schemaBuilder.queryField('games', t =>
   t.connection({
     type: Game,
     resolve: (root, args) =>
-      resolveWindowedConnection({args}, ({offset, limit}) => ({
-        items: Game.getMany(offset, limit),
-        totalCount: Game.count(),
+      resolveWindowedConnection({args}, async ({offset, limit}) => ({
+        items: await Game.getMany(offset, limit),
+        totalCount: await Game.count(),
       })),
   })
 );

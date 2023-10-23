@@ -12,8 +12,8 @@ export class GameSide {
     return this.data.score;
   }
 
-  getTeam(): Team {
-    const team = Team.get(this.data.teamId);
+  async getTeam(): Promise<Team> {
+    const team = await Team.get(this.data.teamId);
     if (!team) {
       throw new Error(
         `Critical Error: Team (id: ${this.data.teamId}) not found for the game side. This indicates data integrity issues with games-to-teams relations.`
