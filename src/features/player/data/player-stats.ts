@@ -1,5 +1,5 @@
 import {PlayerData} from '@features/player/data/player';
-import {getDataSourceMemory} from '@data/sources/memory';
+import {getDataSourcePostgreSQL} from '@data/sources/postgresql';
 
 export interface PlayerStatsData {
   wins: number;
@@ -11,43 +11,60 @@ export interface PlayerStatsData {
 export class PlayerStats {
   constructor(private readonly data: PlayerStatsData) {}
 
-  static get(playerId: PlayerData['id']) {
-    const playerTeams = [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(playerId));
+  static async get(playerId: PlayerData['id']): Promise<PlayerStats> {
+    const dataSource = getDataSourcePostgreSQL();
 
-    const playerTeamIds = playerTeams.map(team => team.id);
+    const playerTeamRelations = await dataSource.teamPlayer.findMany({
+      where: {playerId: playerId},
+      select: {teamId: true},
+    });
+    const playerTeamIds = playerTeamRelations.map(({teamId}) => teamId);
 
-    const games = [...getDataSourceMemory().Games.values()].filter(
-      game => playerTeamIds.includes(game.leftSideTeamId) || playerTeamIds.includes(game.rightSideTeamId)
-    );
+    // Use a raw SQL query to calculate statistics
+
+    // WARNING: Directly casting the database result like this can be risky and is not recommended for production.
+    // Instead, consider using a validation library like 'zod' to ensure the result structure and type safety.
+    // The current method is used for simplicity in this example and might lead to runtime errors.
+    const stats: {[0]: PlayerStatsData} = await getDataSourcePostgreSQL().$queryRaw`
+        SELECT
+            SUM(CASE
+                WHEN "leftTeamId" = ANY(${playerTeamIds}) AND "leftTeamScore" > "rightTeamScore" THEN 1
+                WHEN "rightTeamId" = ANY(${playerTeamIds}) AND "rightTeamScore" > "leftTeamScore" THEN 1
+                ELSE 0
+            END) AS "wins",
+            SUM(CASE
+                WHEN "leftTeamId" = ANY(${playerTeamIds}) AND "leftTeamScore" < "rightTeamScore" THEN 1
+                WHEN "rightTeamId" = ANY(${playerTeamIds}) AND "rightTeamScore" < "leftTeamScore" THEN 1
+                ELSE 0
+            END) AS "losses",
+            SUM(CASE
+                WHEN "leftTeamId" = ANY(${playerTeamIds}) THEN "leftTeamScore"
+                ELSE 0
+            END)
+            +
+            SUM(CASE
+                WHEN "rightTeamId" = ANY(${playerTeamIds}) THEN "rightTeamScore"
+                ELSE 0
+            END) AS "goalsFor",
+            SUM(CASE
+                WHEN "leftTeamId" = ANY(${playerTeamIds}) THEN "rightTeamScore"
+                ELSE 0
+            END)
+            +
+            SUM(CASE
+                WHEN "rightTeamId" = ANY(${playerTeamIds}) THEN "leftTeamScore"
+                ELSE 0
+            END) AS "goalsAgainst"
+        FROM "Game"
+        WHERE "leftTeamId" = ANY(${playerTeamIds}) OR "rightTeamId" = ANY(${playerTeamIds});
+    `;
 
     const statsData: PlayerStatsData = {
-      wins: 0,
-      losses: 0,
-      goalsFor: 0,
-      goalsAgainst: 0,
+      wins: Number(stats[0].wins) || 0,
+      losses: Number(stats[0].losses) || 0,
+      goalsFor: Number(stats[0].goalsFor) || 0,
+      goalsAgainst: Number(stats[0].goalsAgainst) || 0,
     };
-
-    games.forEach(game => {
-      const isPlayerOnLeft = playerTeamIds.includes(game.leftSideTeamId);
-
-      if (isPlayerOnLeft) {
-        if (game.leftSideScore > game.rightSideScore) {
-          statsData.wins += 1;
-        } else if (game.leftSideScore < game.rightSideScore) {
-          statsData.losses += 1;
-        }
-        statsData.goalsFor += game.leftSideScore;
-        statsData.goalsAgainst += game.rightSideScore;
-      } else {
-        if (game.rightSideScore > game.leftSideScore) {
-          statsData.wins += 1;
-        } else if (game.rightSideScore < game.leftSideScore) {
-          statsData.losses += 1;
-        }
-        statsData.goalsFor += game.rightSideScore;
-        statsData.goalsAgainst += game.leftSideScore;
-      }
-    });
 
     return new PlayerStats(statsData);
   }

@@ -43,14 +43,14 @@ schemaBuilder.mutationField('updateGame', t =>
     args: {
       input: t.arg({type: UpdateGameInputRef, required: true}),
     },
-    resolve: (parent, {input}) => {
+    resolve: async (parent, {input}) => {
       const {id} = decodeGlobalID(String(input.id));
-      const game = Game.get(String(id));
+      const game = await Game.get(String(id));
       if (!game) {
         return null;
       }
 
-      game.update(input);
+      await game.update(input);
       return game;
     },
   })
