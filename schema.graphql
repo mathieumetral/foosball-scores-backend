@@ -86,6 +86,7 @@ type PlayerTeamsConnectionEdge {
 }
 
 type Query {
+  game(id: ID!): Game
   games(after: ID, before: ID, first: Int, last: Int): QueryGamesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
