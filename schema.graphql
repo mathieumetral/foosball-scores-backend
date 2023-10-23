@@ -59,6 +59,11 @@ type Player implements Node {
   teams(after: ID, before: ID, first: Int, last: Int): PlayerTeamsConnection!
 }
 
+enum PlayerOrderBy {
+  WINS_LEAST
+  WINS_MOST
+}
+
 type PlayerStats {
   goalsAgainst: Int!
   goalsFor: Int!
@@ -81,7 +86,7 @@ type Query {
   games(after: ID, before: ID, first: Int, last: Int): QueryGamesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-  players(after: ID, before: ID, first: Int, last: Int): QueryPlayersConnection!
+  players(after: ID, before: ID, first: Int, last: Int, orderBy: PlayerOrderBy): QueryPlayersConnection!
 }
 
 type QueryGamesConnection {
