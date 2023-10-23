@@ -60,14 +60,17 @@ type Player implements Node {
 }
 
 enum PlayerOrderBy {
+  RATIO_GOAL_DIFF_MOST
   WINS_LEAST
   WINS_MOST
 }
 
 type PlayerStats {
   goalsAgainst: Int!
+  goalsDifference: Float!
   goalsFor: Int!
   losses: Int!
+  ratio: Float!
   wins: Int!
 }
 
