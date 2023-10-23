@@ -1,8 +1,12 @@
 import {schemaBuilder} from '@app/schema/builder';
-import {Player} from '@features/player/data/player';
+import {Player, PlayerOrderBy} from '@features/player/data/player';
 import {Team} from '@features/team/data/team';
 import {resolveWindowedConnection} from '@lib/pagination/utils';
 import {PlayerStats} from '@features/player/data/player-stats';
+
+schemaBuilder.enumType(PlayerOrderBy, {
+  name: 'PlayerOrderBy',
+});
 
 schemaBuilder.objectType(PlayerStats, {
   name: 'PlayerStats',
