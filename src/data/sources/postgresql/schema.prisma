@@ -1,0 +1,48 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Player represents an individual who participates in games via teams.
+model Player {
+  id    String       @id @default(uuid())
+  name  String       @unique
+  teams TeamPlayer[]
+}
+
+// Team represents a group of players participating in games.
+model Team {
+  id         String       @id @default(uuid())
+  players    TeamPlayer[]
+  leftGames  Game[]       @relation("LeftTeam")
+  rightGames Game[]       @relation("RightTeam")
+}
+
+// TeamPlayer acts as an intermediary table linking Player and Team models.
+// It's explicitly defined for greater control over naming and to accommodate
+// potential additional attributes in the players-to-teams relationship in the future.
+model TeamPlayer {
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId String
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId   String
+
+  @@id([playerId, teamId])
+}
+
+// Game represents a match between two teams with their scores.
+// The "leftTeam" and "rightTeam" indicate the positions at the table.
+model Game {
+  id             String   @id @default(uuid())
+  datePlayed     DateTime @default(now())
+  leftTeam       Team     @relation(fields: [leftTeamId], references: [id], name: "LeftTeam", onDelete: Cascade)
+  leftTeamId     String
+  leftTeamScore  Int
+  rightTeam      Team     @relation(fields: [rightTeamId], references: [id], name: "RightTeam", onDelete: Cascade)
+  rightTeamId    String
+  rightTeamScore Int
+}
