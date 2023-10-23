@@ -1,6 +1,6 @@
-import {getDataSourceMemory} from '@data/sources/memory';
 import {Team} from '@features/team/data/team';
 import {PlayerStats} from '@features/player/data/player-stats';
+import {getDataSourcePostgreSQL} from '@data/sources/postgresql';
 
 export interface PlayerData {
   id: string;
@@ -10,31 +10,31 @@ export interface PlayerData {
 export class Player {
   constructor(private readonly data: PlayerData) {}
 
-  static get(id: PlayerData['id']): Player | null {
-    const data = getDataSourceMemory().Players.get(id);
+  static async get(id: PlayerData['id']): Promise<Player | null> {
+    const data = await getDataSourcePostgreSQL().player.findUnique({where: {id}});
     return data ? new Player(data) : null;
   }
 
-  static getOrCreateByName(name: PlayerData['name']): Player {
-    const existingData = [...getDataSourceMemory().Players.values()].filter(data => data.name === name);
-    if (existingData.length) {
-      return new Player(existingData[0]);
-    }
+  static async getOrCreateByName(name: PlayerData['name']): Promise<Player> {
+    const data = await getDataSourcePostgreSQL().player.upsert({
+      where: {name},
+      create: {name},
+      update: {},
+    });
 
-    const newData: PlayerData = {
-      id: crypto.randomUUID(),
-      name,
-    };
-    getDataSourceMemory().Players.set(newData.id, newData);
-    return new Player(newData);
+    return new Player(data);
   }
 
-  static getMany(offset: number, limit: number): Player[] {
-    return [...getDataSourceMemory().Players.values()].slice(offset, offset + limit).map(data => new Player(data));
+  static async getMany(offset: number, limit: number): Promise<Player[]> {
+    const data = await getDataSourcePostgreSQL().player.findMany({
+      skip: offset,
+      take: limit,
+    });
+    return data.map(entry => new Player(entry));
   }
 
-  static count(): number {
-    return [...getDataSourceMemory().Players.values()].length;
+  static async count(): Promise<number> {
+    return getDataSourcePostgreSQL().player.count();
   }
 
   getId(): string {
@@ -45,19 +45,27 @@ export class Player {
     return this.data.name;
   }
 
-  getTeams(offset: number, limit: number): Team[] {
-    const teams = [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(this.getId()));
-    return teams
-      .slice(offset, offset + limit)
-      .map(({id}) => Team.get(id))
-      .filter(Boolean);
+  async getTeams(offset: number, limit: number): Promise<Team[]> {
+    const teamRelations = await getDataSourcePostgreSQL().teamPlayer.findMany({
+      where: {playerId: this.getId()},
+      skip: offset,
+      take: limit,
+      select: {teamId: true},
+    });
+
+    const teams = await Promise.all(teamRelations.map(({teamId}) => Team.get(teamId)));
+    return teams.filter(Boolean);
   }
 
-  countTeams(): number {
-    return [...getDataSourceMemory().Teams.values()].filter(team => team.playerIds.includes(this.getId())).length;
+  async countTeams(): Promise<number> {
+    return getDataSourcePostgreSQL().teamPlayer.count({
+      where: {
+        playerId: this.getId(),
+      },
+    });
   }
 
-  getStats(): PlayerStats {
+  async getStats(): Promise<PlayerStats> {
     return PlayerStats.get(this.getId());
   }
 }
