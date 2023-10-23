@@ -11,6 +11,7 @@ export interface PlayerData {
 export enum PlayerOrderBy {
   WINS_MOST,
   WINS_LEAST,
+  RATIO_GOAL_DIFF_MOST,
 }
 
 export class Player {
@@ -36,17 +37,20 @@ export class Player {
 
     switch (orderBy) {
       case PlayerOrderBy.WINS_LEAST:
-        orderByClause = Prisma.sql`wins."numberOfWins" ASC`;
+        orderByClause = Prisma.sql`stats."numberOfWins" ASC`;
         break;
       case PlayerOrderBy.WINS_MOST:
+        orderByClause = Prisma.sql`stats."numberOfWins" DESC`;
+        break;
+      case PlayerOrderBy.RATIO_GOAL_DIFF_MOST:
       default:
-        orderByClause = Prisma.sql`wins."numberOfWins" DESC`;
+        orderByClause = Prisma.sql`stats."winRatio" DESC, stats."goalDifference" DESC`;
         break;
     }
 
     // WARNING: Directly casting the database result like this can be risky.
     const data: PlayerData[] = await getDataSourcePostgreSQL().$queryRaw`
-        SELECT p.*, wins."numberOfWins"
+        SELECT p.*, stats."numberOfWins"
         FROM "Player" p
         LEFT JOIN (
             SELECT tp."playerId",
@@ -54,11 +58,23 @@ export class Player {
                     WHEN g."leftTeamId" = tp."teamId" AND g."leftTeamScore" > g."rightTeamScore" THEN 1
                     WHEN g."rightTeamId" = tp."teamId" AND g."rightTeamScore" > g."leftTeamScore" THEN 1
                     ELSE 0
-                END) AS "numberOfWins"
+                END) AS "numberOfWins",
+                CASE
+                    WHEN COUNT(g.id) = 0 THEN 0
+                    ELSE (CAST(SUM(CASE
+                        WHEN g."leftTeamId" = tp."teamId" AND g."leftTeamScore" > g."rightTeamScore" THEN 1
+                        WHEN g."rightTeamId" = tp."teamId" AND g."rightTeamScore" > g."leftTeamScore" THEN 1
+                        ELSE 0
+                    END) AS FLOAT) / COUNT(g.id)) END AS "winRatio",
+                SUM(CASE
+                    WHEN g."leftTeamId" = tp."teamId" THEN g."leftTeamScore" - g."rightTeamScore"
+                    WHEN g."rightTeamId" = tp."teamId" THEN g."rightTeamScore" - g."leftTeamScore"
+                    ELSE 0
+                END) AS "goalDifference"
             FROM "TeamPlayer" tp
             JOIN "Game" g ON g."leftTeamId" = tp."teamId" OR g."rightTeamId" = tp."teamId"
             GROUP BY tp."playerId"
-        ) wins ON p."id" = wins."playerId"
+        ) stats ON p."id" = stats."playerId"
         ORDER BY ${orderByClause}
         OFFSET ${offset}
         LIMIT ${limit};
