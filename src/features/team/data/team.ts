@@ -1,59 +1,69 @@
-import {getDataSourceMemory} from '@data/sources/memory';
 import {Player, PlayerData} from '@features/player/data/player';
 import {Game} from '@features/game/data/game';
+import {getDataSourcePostgreSQL} from '@data/sources/postgresql';
 
 export interface TeamData {
   id: string;
-  playerIds: string[];
 }
 
 export class Team {
   constructor(private readonly data: TeamData) {}
 
-  static get(id: TeamData['id']): Team | null {
-    const data = getDataSourceMemory().Teams.get(id);
+  static async get(id: TeamData['id']): Promise<Team | null> {
+    const data = await getDataSourcePostgreSQL().team.findUnique({where: {id}});
     return data ? new Team(data) : null;
   }
 
-  static getOrCreateByPlayerName(name: PlayerData['name']): Team {
-    const player = Player.getOrCreateByName(name);
+  static async getOrCreateByPlayerName(name: PlayerData['name']): Promise<Team> {
+    const dataSource = getDataSourcePostgreSQL();
+    const player = await Player.getOrCreateByName(name);
 
-    const existingData = [...getDataSourceMemory().Teams.values()].filter(
-      data => data.playerIds.length === 1 && data.playerIds.includes(player.getId())
-    );
-    if (existingData.length) {
-      return new Team(existingData[0]);
+    const existingData = await dataSource.team.findFirst({
+      where: {players: {every: {playerId: player.getId()}}},
+    });
+    if (existingData) {
+      return new Team(existingData);
     }
 
-    const newData: TeamData = {
-      id: crypto.randomUUID(),
-      playerIds: [player.getId()],
-    };
-    getDataSourceMemory().Teams.set(newData.id, newData);
-    return new Team(newData);
+    const createdData = await dataSource.team.create({
+      data: {players: {create: {playerId: player.getId()}}},
+    });
+    return new Team(createdData);
   }
 
   getId(): string {
     return this.data.id;
   }
 
-  getPlayers(): Player[] {
-    return this.data.playerIds.map(playerId => Player.get(playerId)).filter(Boolean);
+  async getPlayers(): Promise<Player[]> {
+    const playerRelations = await getDataSourcePostgreSQL().teamPlayer.findMany({
+      where: {teamId: this.getId()},
+      select: {playerId: true},
+    });
+
+    const players = await Promise.all(playerRelations.map(({playerId}) => Player.get(playerId)));
+    return players.filter(Boolean);
   }
 
-  getGames(offset: number, limit: number): Game[] {
-    const games = [...getDataSourceMemory().Games.values()].filter(
-      game => game.leftSideTeamId === this.getId() || game.rightSideTeamId === this.getId()
-    );
-    return games
-      .slice(offset, offset + limit)
-      .map(({id}) => Game.get(id))
-      .filter(Boolean);
+  async getGames(offset: number, limit: number): Promise<Game[]> {
+    const gameRelations = await getDataSourcePostgreSQL().game.findMany({
+      where: {
+        OR: [{leftTeamId: this.getId()}, {rightTeamId: this.getId()}],
+      },
+      skip: offset,
+      take: limit,
+      select: {id: true},
+    });
+
+    const games = await Promise.all(gameRelations.map(({id}) => Game.get(id)));
+    return games.filter(Boolean);
   }
 
-  countGames(): number {
-    return [...getDataSourceMemory().Games.values()].filter(
-      game => game.leftSideTeamId === this.getId() || game.rightSideTeamId === this.getId()
-    ).length;
+  async countGames(): Promise<number> {
+    return getDataSourcePostgreSQL().game.count({
+      where: {
+        OR: [{leftTeamId: this.getId()}, {rightTeamId: this.getId()}],
+      },
+    });
   }
 }
