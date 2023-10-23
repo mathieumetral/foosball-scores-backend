@@ -35,10 +35,10 @@ schemaBuilder.node(Player, {
     teams: t.connection({
       type: Team,
       resolve: (player, args) =>
-        resolveWindowedConnection({args}, ({offset, limit}) => {
+        resolveWindowedConnection({args}, async ({offset, limit}) => {
           return {
-            items: player.getTeams(offset, limit),
-            totalCount: player.countTeams(),
+            items: await player.getTeams(offset, limit),
+            totalCount: await player.countTeams(),
           };
         }),
     }),
