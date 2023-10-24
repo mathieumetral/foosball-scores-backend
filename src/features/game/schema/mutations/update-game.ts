@@ -16,25 +16,35 @@ export interface UpdateGameInput {
 
 // Inputs
 const UpdateGameSideInputRef = schemaBuilder.inputRef<UpdateGameSideInput>('UpdateGameSideInput').implement({
+  description: 'Input type for updating a game side. Only provided fields will be updated.',
   fields: t => ({
-    playerName: t.string(),
-    score: t.int(),
+    playerName: t.string({
+      description: 'Name for the player on this side of the game.',
+    }),
+    score: t.int({
+      description: 'Score for the game side.',
+    }),
   }),
 });
 
 const UpdateGameInputRef = schemaBuilder.inputRef<UpdateGameInput>('UpdateGameInput').implement({
+  description: 'Input type for updating a game. Only provided fields will be updated.',
   fields: t => ({
     id: t.id({
+      description: 'The unique identifier of the game to be updated.',
       required: true,
     }),
     datePlayed: t.field({
       type: 'DateTime',
+      description: 'Date and time when the game was played.',
     }),
     leftSide: t.field({
       type: UpdateGameSideInputRef,
+      description: 'Information for updating the left side of the game.',
     }),
     rightSide: t.field({
       type: UpdateGameSideInputRef,
+      description: 'Information for updating the right side of the game.',
     }),
   }),
 });
@@ -43,6 +53,8 @@ const UpdateGameInputRef = schemaBuilder.inputRef<UpdateGameInput>('UpdateGameIn
 schemaBuilder.mutationField('updateGame', t =>
   t.field({
     type: Game,
+    description:
+      'Updates a game based on the provided input. Only provided fields will be updated. Returns the updated game if successful, and null if the game is not found.',
     nullable: true,
     args: {
       input: t.arg({type: UpdateGameInputRef, required: true}),
