@@ -7,6 +7,7 @@ export interface CreateGameSideInput {
 }
 
 export interface CreateGameInput {
+  datePlayed?: Date | null | undefined;
   leftSide: CreateGameSideInput;
   rightSide: CreateGameSideInput;
 }
@@ -23,6 +24,9 @@ const CreateGameSideInputRef = schemaBuilder.inputRef<CreateGameSideInput>('Crea
 
 const CreateGameInputRef = schemaBuilder.inputRef<CreateGameInput>('CreateGameInput').implement({
   fields: t => ({
+    datePlayed: t.field({
+      type: 'DateTime',
+    }),
     leftSide: t.field({
       type: CreateGameSideInputRef,
       required: true,
