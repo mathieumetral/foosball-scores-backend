@@ -41,6 +41,10 @@ yarn build # or npm run build
 yarn start # or npm run start
 ```
 
+## API Documentation
+
+The API documentation is accessible at http://localhost:4000/graphql. This interface, powered by GraphiQL, allows for testing and exploration of the API once the server is up and running.
+
 ## Dependencies
 
 Below is a list of dependencies used in this project, along with their purpose as defined in the `package.json`:
