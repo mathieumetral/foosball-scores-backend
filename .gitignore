@@ -7,6 +7,9 @@ yarn-error.log*
 # Package Manager
 node_modules/
 
+# Build
+dist
+
 # Misc
 .DS_Store
 *.pem
