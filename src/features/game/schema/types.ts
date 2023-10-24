@@ -23,6 +23,10 @@ schemaBuilder.node(Game, {
   },
   loadMany: ids => ids.map(id => Game.get(id)),
   fields: t => ({
+    datePlayed: t.field({
+      type: 'DateTime',
+      resolve: game => game.getDatePlayed(),
+    }),
     leftSide: t.field({
       type: GameSide,
       resolve: game => game.getLeftSide(),

@@ -9,6 +9,7 @@ export interface UpdateGameSideInput {
 
 export interface UpdateGameInput {
   id: string | number;
+  datePlayed?: Date | null | undefined;
   leftSide?: UpdateGameSideInput | null | undefined;
   rightSide?: UpdateGameSideInput | null | undefined;
 }
@@ -25,6 +26,9 @@ const UpdateGameInputRef = schemaBuilder.inputRef<UpdateGameInput>('UpdateGameIn
   fields: t => ({
     id: t.id({
       required: true,
+    }),
+    datePlayed: t.field({
+      type: 'DateTime',
     }),
     leftSide: t.field({
       type: UpdateGameSideInputRef,

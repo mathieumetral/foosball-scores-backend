@@ -6,6 +6,7 @@ import {getDataSourcePostgreSQL} from '@data/sources/postgresql';
 
 export interface GameData {
   id: string;
+  datePlayed: Date;
   leftTeamId: GameSideData['teamId'];
   leftTeamScore: GameSideData['score'];
   rightTeamId: GameSideData['teamId'];
@@ -22,6 +23,9 @@ export class Game {
 
   static async getMany(offset: number, limit: number): Promise<Game[]> {
     const data = await getDataSourcePostgreSQL().game.findMany({
+      orderBy: {
+        datePlayed: 'desc',
+      },
       skip: offset,
       take: limit,
     });
@@ -45,6 +49,7 @@ export class Game {
 
     const createdData = await getDataSourcePostgreSQL().game.create({
       data: {
+        datePlayed: input.datePlayed ?? undefined,
         leftTeamId: leftTeam.getId(),
         rightTeamId: rightTeam.getId(),
         leftTeamScore: input.leftSide.score ?? 0,
@@ -68,6 +73,7 @@ export class Game {
     this.data = await getDataSourcePostgreSQL().game.update({
       where: {id: this.getId()},
       data: {
+        datePlayed: input.datePlayed ?? this.getDatePlayed(),
         leftTeamId: leftTeam.getId(),
         rightTeamId: rightTeam.getId(),
         leftTeamScore: input.leftSide?.score ?? this.getLeftSide().getScore(),
@@ -84,6 +90,10 @@ export class Game {
 
   getId(): string {
     return this.data.id;
+  }
+
+  getDatePlayed(): Date {
+    return this.data.datePlayed;
   }
 
   getLeftSide(): GameSide {
