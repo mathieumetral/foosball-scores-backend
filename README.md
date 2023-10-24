@@ -21,6 +21,9 @@ yarn install # or npm install
 # Start up the database
 docker compose up -d
 
+# Run Prisma migrations
+npx prisma migrate dev
+
 # Run the development server
 yarn dev # or npm run dev
 ```
@@ -33,6 +36,9 @@ yarn install # or npm install
 
 # Start up the database
 docker compose up -d
+
+# Run Prisma migrations
+npx prisma migrate deploy
 
 # Build
 yarn build # or npm run build
