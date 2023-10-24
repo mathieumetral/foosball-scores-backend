@@ -2,14 +2,15 @@
   "name": "@foosball-scores/backend",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
+    "build": "esbuild src/main.ts --bundle --outfile=dist/main.js --platform=node --minify",
+    "start": "node dist/main.js",
     "dev": "tsx watch src/main.ts",
     "schema:print": "tsx scripts/schema-print.ts",
-    "format": "prettier --check '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
-    "format:fix": "prettier --write '{**/*,*}.{js,cjs,ts,json,yml,yaml}'",
-    "lint": "eslint '{**/*,*}.{js,cjs,ts}'",
-    "lint:fix": "eslint --fix '{**/*,*}.{js,cjs,ts}'",
+    "format": "prettier --check '{**/*,*}.{js,mjs,ts,json,yml,yaml}'",
+    "format:fix": "prettier --write '{**/*,*}.{js,mjs,ts,json,yml,yaml}'",
+    "lint": "eslint '{**/*,*}.{js,mjs,ts}'",
+    "lint:fix": "eslint --fix '{**/*,*}.{js,mjs,ts}'",
     "typescript:check": "tsc --project tsconfig.json"
   },
   "prisma": {
@@ -20,6 +21,7 @@
     "@types/node": "^20.8.7",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
+    "esbuild": "^0.19.5",
     "eslint": "^8.52.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.0",

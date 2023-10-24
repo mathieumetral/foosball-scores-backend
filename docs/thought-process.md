@@ -48,3 +48,10 @@ This project adheres to two GraphQL specifications:
 
 1. [Global Object Identification](https://graphql.org/learn/global-object-identification/)
 2. [Cursor Connections](https://relay.dev/graphql/connections.htm)
+
+## Some Improvement Ideas
+
+1. **Testing**: First and foremost, tests should be set up for the code. I've not done it here to simplify the exercise.
+2. **Error Handling**: Improve user errors, especially those linked to incorrect inputs for mutations. An interesting approach can be found at: https://productionreadygraphql.com/2020-08-01-guide-to-graphql-errors.
+3. **Guard Against Large Queries**: Implement protections against excessively large GraphQL queries. More on this can be found at: https://the-guild.dev/graphql/shield.
+4. **Dataloader Implementation**: Implement [Dataloader](https://github.com/graphql/dataloader) to efficiently batch and cache (memory) data fetches, significantly improving query performance.
