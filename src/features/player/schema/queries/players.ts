@@ -5,8 +5,11 @@ import {resolveWindowedConnection} from '@lib/pagination/utils';
 schemaBuilder.queryField('players', t =>
   t.connection({
     type: Player,
+    description:
+      'Fetches a paginated list of players. Pagination parameters follow the GraphQL connections specification. Results can be sorted with a custom order using the "orderBy" argument.',
     args: {
       orderBy: t.arg({
+        description: 'Determines the order in which players are returned.',
         type: PlayerOrderBy,
       }),
     },

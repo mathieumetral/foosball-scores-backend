@@ -8,8 +8,10 @@ interface DeleteGameInput {
 
 // Inputs
 const DeleteGameInputRef = schemaBuilder.inputRef<DeleteGameInput>('DeleteGameInput').implement({
+  description: 'Input type for deleting a game based on its unique identifier.',
   fields: t => ({
     id: t.id({
+      description: 'The unique identifier of the game to be deleted.',
       required: true,
     }),
   }),
@@ -19,6 +21,8 @@ const DeleteGameInputRef = schemaBuilder.inputRef<DeleteGameInput>('DeleteGameIn
 schemaBuilder.mutationField('deleteGame', t =>
   t.field({
     type: Game,
+    description:
+      'Deletes a game based on the provided ID and returns the deleted game if successful. If no game is found for the given ID, null is returned.',
     nullable: true,
     args: {
       input: t.arg({type: DeleteGameInputRef, required: true}),
