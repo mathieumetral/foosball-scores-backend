@@ -50,7 +50,7 @@ export class Player {
 
     // WARNING: Directly casting the database result like this can be risky.
     const data: PlayerData[] = await getDataSourcePostgreSQL().$queryRaw`
-        SELECT p.*, stats."numberOfWins"
+        SELECT p.*
         FROM "Player" p
         LEFT JOIN (
             SELECT tp."playerId",
@@ -75,7 +75,9 @@ export class Player {
             JOIN "Game" g ON g."leftTeamId" = tp."teamId" OR g."rightTeamId" = tp."teamId"
             GROUP BY tp."playerId"
         ) stats ON p."id" = stats."playerId"
-        ORDER BY ${orderByClause}
+        ORDER BY
+            CASE WHEN stats."numberOfWins" IS NULL THEN 1 ELSE 0 END,
+            ${orderByClause}
         OFFSET ${offset}
         LIMIT ${limit};
     `;
