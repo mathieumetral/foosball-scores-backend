@@ -392,17 +392,10 @@
   resolved "https://registry.yarnpkg.com/@pothos/plugin-relay/-/plugin-relay-3.44.0.tgz#6a68d9415ff81c657a3e88481fb190a1d49b9440"
   integrity sha512-7eOsgKL2qCQ+/hHpye4sNNbR2mYogDXPWpQboqniYvUdOjez3VDYjAuOn8Ntw73kZQF0N1iloZPikhCxvY7xuw==
 
-"@prisma/client@5.4.2":
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/@prisma/client/-/client-5.4.2.tgz#786f9c1d8f06d955933004ac638d14da4bf14025"
-  integrity sha512-2xsPaz4EaMKj1WS9iW6MlPhmbqtBsXAOeVttSePp8vTFTtvzh2hZbDgswwBdSCgPzmmwF+tLB259QzggvCmJqA==
-  dependencies:
-    "@prisma/engines-version" "5.4.1-2.ac9d7041ed77bcc8a8dbd2ab6616b39013829574"
-
-"@prisma/engines-version@5.4.1-2.ac9d7041ed77bcc8a8dbd2ab6616b39013829574":
-  version "5.4.1-2.ac9d7041ed77bcc8a8dbd2ab6616b39013829574"
-  resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-5.4.1-2.ac9d7041ed77bcc8a8dbd2ab6616b39013829574.tgz#ff14f2926890edee47e8f1d08df7b4f392ee34bf"
-  integrity sha512-wvupDL4AA1vf4TQNANg7kR7y98ITqPsk6aacfBxZKtrJKRIsWjURHkZCGcQliHdqCiW/hGreO6d6ZuSv9MhdAA==
+"@prisma/client@5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@prisma/client/-/client-5.7.0.tgz#c29dd9a16e100902eb2d2443d90fee2482d2aeac"
+  integrity sha512-cZmglCrfNbYpzUtz7HscVHl38e9CrUs31nrVoGUK1nIPXGgt8hT4jj2s657UXcNdQ/jBUxDgGmHyu2Nyrq1txg==
 
 "@prisma/engines@5.4.2":
   version "5.4.2"
